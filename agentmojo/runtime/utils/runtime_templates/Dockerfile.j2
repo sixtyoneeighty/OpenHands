@@ -1,0 +1,160 @@
+FROM {{ base_image }}
+
+# Shared environment variables
+ENV POETRY_VIRTUALENVS_PATH=/agentmojo/poetry \
+    MAMBA_ROOT_PREFIX=/agentmojo/micromamba \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    EDITOR=code \
+    VISUAL=code \
+    GIT_EDITOR="code --wait" \
+    OPENVSCODE_SERVER_ROOT=/agentmojo/.openvscode-server
+
+{% macro setup_base_system() %}
+
+# Install base system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        wget curl sudo apt-utils git jq tmux \
+        {%- if 'ubuntu' in base_image and (base_image.endswith(':latest') or base_image.endswith(':24.04')) -%}
+        libgl1 \
+        {%- else %}
+        libgl1-mesa-glx \
+        {% endif -%}
+        libasound2-plugins libatomic1 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Remove UID 1000 if it's called pn--this fixes the nikolaik image for ubuntu users
+RUN if getent passwd 1000 | grep -q pn; then userdel pn; fi
+
+# Create necessary directories
+RUN mkdir -p /agentmojo && \
+    mkdir -p /agentmojo/logs && \
+    mkdir -p /agentmojo/poetry
+
+{% endmacro %}
+
+{% macro setup_vscode_server() %}
+# Reference:
+# 1. https://github.com/gitpod-io/openvscode-server
+# 2. https://github.com/gitpod-io/openvscode-releases
+
+# Setup VSCode Server
+ARG RELEASE_TAG="openvscode-server-v1.94.2"
+ARG RELEASE_ORG="gitpod-io"
+# ARG USERNAME=openvscode-server
+# ARG USER_UID=1000
+# ARG USER_GID=1000
+
+RUN if [ -z "${RELEASE_TAG}" ]; then \
+        echo "The RELEASE_TAG build arg must be set." >&2 && \
+        exit 1; \
+    fi && \
+    arch=$(uname -m) && \
+    if [ "${arch}" = "x86_64" ]; then \
+        arch="x64"; \
+    elif [ "${arch}" = "aarch64" ]; then \
+        arch="arm64"; \
+    elif [ "${arch}" = "armv7l" ]; then \
+        arch="armhf"; \
+    fi && \
+    wget https://github.com/${RELEASE_ORG}/openvscode-server/releases/download/${RELEASE_TAG}/${RELEASE_TAG}-linux-${arch}.tar.gz && \
+    tar -xzf ${RELEASE_TAG}-linux-${arch}.tar.gz && \
+    if [ -d "${OPENVSCODE_SERVER_ROOT}" ]; then rm -rf "${OPENVSCODE_SERVER_ROOT}"; fi && \
+    mv ${RELEASE_TAG}-linux-${arch} ${OPENVSCODE_SERVER_ROOT} && \
+    cp ${OPENVSCODE_SERVER_ROOT}/bin/remote-cli/openvscode-server ${OPENVSCODE_SERVER_ROOT}/bin/remote-cli/code && \
+    rm -f ${RELEASE_TAG}-linux-${arch}.tar.gz
+
+{% endmacro %}
+
+{% macro install_vscode_extensions() %}
+# Install our custom extension
+RUN mkdir -p ${OPENVSCODE_SERVER_ROOT}/extensions/agentmojo-hello-world && \
+    cp -r /agentmojo/code/agentmojo/runtime/utils/vscode-extensions/hello-world/* ${OPENVSCODE_SERVER_ROOT}/extensions/agentmojo-hello-world/
+
+RUN mkdir -p ${OPENVSCODE_SERVER_ROOT}/extensions/agentmojo-memory-monitor && \
+    cp -r /agentmojo/code/agentmojo/runtime/utils/vscode-extensions/memory-monitor/* ${OPENVSCODE_SERVER_ROOT}/extensions/agentmojo-memory-monitor/
+{% endmacro %}
+
+{% macro install_dependencies() %}
+# Install all dependencies
+WORKDIR /agentmojo/code
+RUN \
+    /agentmojo/micromamba/bin/micromamba config set changeps1 False && \
+    # Configure Poetry and create virtual environment
+    /agentmojo/micromamba/bin/micromamba run -n agentmojo poetry config virtualenvs.path /agentmojo/poetry && \
+    /agentmojo/micromamba/bin/micromamba run -n agentmojo poetry env use python3.12 && \
+    # Install project dependencies
+    /agentmojo/micromamba/bin/micromamba run -n agentmojo poetry install --only main,runtime --no-interaction --no-root && \
+    # Update and install additional tools
+    apt-get update && \
+    /agentmojo/micromamba/bin/micromamba run -n agentmojo poetry run pip install playwright && \
+    /agentmojo/micromamba/bin/micromamba run -n agentmojo poetry run playwright install --with-deps chromium && \
+    # Set environment variables
+    echo "OH_INTERPRETER_PATH=$(/agentmojo/micromamba/bin/micromamba run -n agentmojo poetry run python -c "import sys; print(sys.executable)")" >> /etc/environment && \
+    # Clear caches
+    /agentmojo/micromamba/bin/micromamba run -n agentmojo poetry cache clear --all . -n && \
+    # Set permissions
+    chmod -R g+rws /agentmojo/poetry && \
+    mkdir -p /agentmojo/workspace && chmod -R g+rws,o+rw /agentmojo/workspace && \
+    # Clean up
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    /agentmojo/micromamba/bin/micromamba clean --all
+
+{% endmacro %}
+
+{% if build_from_scratch %}
+# ================================================================
+# START: Build Runtime Image from Scratch
+# ================================================================
+# This is used in cases where the base image is something more generic like nikolaik/python-nodejs
+# rather than the current AgentMojo release
+
+{{ setup_base_system() }}
+
+# Install micromamba
+RUN mkdir -p /agentmojo/micromamba/bin && \
+    /bin/bash -c "PREFIX_LOCATION=/agentmojo/micromamba BIN_FOLDER=/agentmojo/micromamba/bin INIT_YES=no CONDA_FORGE_YES=yes $(curl -L https://micro.mamba.pm/install.sh)" && \
+    /agentmojo/micromamba/bin/micromamba config remove channels defaults && \
+    /agentmojo/micromamba/bin/micromamba config list
+
+# Create the agentmojo virtual environment and install poetry and python
+RUN /agentmojo/micromamba/bin/micromamba create -n agentmojo -y && \
+    /agentmojo/micromamba/bin/micromamba install -n agentmojo -c conda-forge poetry python=3.12 -y
+
+# Create a clean agentmojo directory including only the pyproject.toml, poetry.lock and agentmojo/__init__.py
+RUN \
+    if [ -d /agentmojo/code ]; then rm -rf /agentmojo/code; fi && \
+    mkdir -p /agentmojo/code/agentmojo && \
+    touch /agentmojo/code/agentmojo/__init__.py
+
+COPY ./code/pyproject.toml ./code/poetry.lock /agentmojo/code/
+
+{{ install_dependencies() }}
+
+# ================================================================
+# END: Build Runtime Image from Scratch
+# ================================================================
+{% endif %}
+
+# ================================================================
+# Copy Project source files
+# ================================================================
+RUN if [ -d /agentmojo/code/agentmojo ]; then rm -rf /agentmojo/code/agentmojo; fi
+COPY ./code/pyproject.toml ./code/poetry.lock /agentmojo/code/
+COPY ./code/agentmojo /agentmojo/code/agentmojo
+RUN chmod a+rwx /agentmojo/code/agentmojo/__init__.py
+
+{{ setup_vscode_server() }}
+
+# ================================================================
+# END: Build from versioned image
+# ================================================================
+{% if build_from_versioned %}
+{{ install_dependencies() }}
+{{ install_vscode_extensions() }}
+{% endif %}
+
+# Install extra dependencies if specified
+{% if extra_deps %}RUN {{ extra_deps }} {% endif %}

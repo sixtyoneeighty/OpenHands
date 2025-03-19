@@ -1,4 +1,4 @@
-export type OpenHandsEventType =
+export type AgentMojoEventType =
   | "message"
   | "agent_state_changed"
   | "run"
@@ -14,21 +14,21 @@ export type OpenHandsEventType =
   | "finish"
   | "error";
 
-interface OpenHandsBaseEvent {
+interface AgentMojoBaseEvent {
   id: number;
   source: "agent" | "user";
   message: string;
   timestamp: string; // ISO 8601
 }
 
-export interface OpenHandsActionEvent<T extends OpenHandsEventType>
-  extends OpenHandsBaseEvent {
+export interface AgentMojoActionEvent<T extends AgentMojoEventType>
+  extends AgentMojoBaseEvent {
   action: T;
   args: Record<string, unknown>;
 }
 
-export interface OpenHandsObservationEvent<T extends OpenHandsEventType>
-  extends OpenHandsBaseEvent {
+export interface AgentMojoObservationEvent<T extends AgentMojoEventType>
+  extends AgentMojoBaseEvent {
   cause: number;
   observation: T;
   content: string;

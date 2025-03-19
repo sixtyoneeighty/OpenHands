@@ -1,0 +1,50 @@
+{
+    "name": "agentmojo-memory-monitor",
+    "displayName": "AgentMojo Memory Monitor",
+    "description": "A VSCode extension for monitoring system and process memory usage",
+    "version": "0.1.0",
+    "publisher": "agentmojo",
+    "engines": {
+        "vscode": "^1.94.0"
+    },
+    "categories": [
+        "Other",
+        "Monitoring"
+    ],
+    "activationEvents": [
+        "onStartupFinished"
+    ],
+    "main": "./extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "agentmojo-memory-monitor.startMemoryMonitor",
+                "title": "Start Memory Monitor"
+            },
+            {
+                "command": "agentmojo-memory-monitor.stopMemoryMonitor",
+                "title": "Stop Memory Monitor"
+            },
+            {
+                "command": "agentmojo-memory-monitor.showMemoryDetails",
+                "title": "Show Memory Details"
+            }
+        ],
+        "menus": {
+            "commandPalette": [
+                {
+                    "command": "agentmojo-memory-monitor.startMemoryMonitor",
+                    "group": "AgentMojo"
+                },
+                {
+                    "command": "agentmojo-memory-monitor.stopMemoryMonitor",
+                    "group": "AgentMojo"
+                },
+                {
+                    "command": "agentmojo-memory-monitor.showMemoryDetails",
+                    "group": "AgentMojo"
+                }
+            ]
+        }
+    }
+}

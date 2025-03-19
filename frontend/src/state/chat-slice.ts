@@ -3,18 +3,18 @@ import type { Message } from "#/message";
 
 import { ActionSecurityRisk } from "#/state/security-analyzer-slice";
 import {
-  OpenHandsObservation,
+  AgentMojoObservation,
   CommandObservation,
   IPythonObservation,
 } from "#/types/core/observations";
-import { OpenHandsAction } from "#/types/core/actions";
-import { OpenHandsEventType } from "#/types/core/base";
+import { AgentMojoAction } from "#/types/core/actions";
+import { AgentMojoEventType } from "#/types/core/base";
 
 type SliceState = { messages: Message[] };
 
 const MAX_CONTENT_LENGTH = 1000;
 
-const HANDLED_ACTIONS: OpenHandsEventType[] = [
+const HANDLED_ACTIONS: AgentMojoEventType[] = [
   "run",
   "run_ipython",
   "write",
@@ -88,7 +88,7 @@ export const chatSlice = createSlice({
 
     addAssistantAction(
       state: SliceState,
-      action: PayloadAction<OpenHandsAction>,
+      action: PayloadAction<AgentMojoAction>,
     ) {
       const actionID = action.payload.action;
       if (!HANDLED_ACTIONS.includes(actionID)) {
@@ -132,7 +132,7 @@ export const chatSlice = createSlice({
 
     addAssistantObservation(
       state: SliceState,
-      observation: PayloadAction<OpenHandsObservation>,
+      observation: PayloadAction<AgentMojoObservation>,
     ) {
       const observationID = observation.payload.observation;
       if (!HANDLED_ACTIONS.includes(observationID)) {

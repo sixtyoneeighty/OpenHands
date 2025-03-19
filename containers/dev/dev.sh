@@ -2,7 +2,7 @@
 set -o pipefail
 
 function get_docker() {
-    echo "Docker is required to build and run OpenHands."
+    echo "Docker is required to build and run AgentMojo."
     echo "https://docs.docker.com/get-started/get-docker/"
     exit 1
 }

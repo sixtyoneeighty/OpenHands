@@ -1,12 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import OpenHands from "#/api/open-hands";
+import AgentMojo from "#/api/open-hands";
 
 export const useDeleteConversation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (variables: { conversationId: string }) =>
-      OpenHands.deleteUserConversation(variables.conversationId),
+      AgentMojo.deleteUserConversation(variables.conversationId),
     onMutate: async (variables) => {
       await queryClient.cancelQueries({ queryKey: ["user", "conversations"] });
       const previousConversations = queryClient.getQueryData([

@@ -1,8 +1,8 @@
-import { OpenHandsAction } from "./actions";
-import { OpenHandsObservation } from "./observations";
-import { OpenHandsVariance } from "./variances";
+import { AgentMojoAction } from "./actions";
+import { AgentMojoObservation } from "./observations";
+import { AgentMojoVariance } from "./variances";
 
-export type OpenHandsParsedEvent =
-  | OpenHandsAction
-  | OpenHandsObservation
-  | OpenHandsVariance;
+export type AgentMojoParsedEvent =
+  | AgentMojoAction
+  | AgentMojoObservation
+  | AgentMojoVariance;

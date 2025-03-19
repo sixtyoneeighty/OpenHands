@@ -15,7 +15,7 @@ import {
 import { openHands } from "./open-hands-axios";
 import { ApiSettings, PostApiSettings } from "#/types/settings";
 
-class OpenHands {
+class AgentMojo {
   /**
    * Retrieve the list of models available
    * @returns List of models available
@@ -348,4 +348,4 @@ class OpenHands {
   }
 }
 
-export default OpenHands;
+export default AgentMojo;

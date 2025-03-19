@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import OpenHands from "#/api/open-hands";
+import AgentMojo from "#/api/open-hands";
 
 const fetchAiConfigOptions = async () => ({
-  models: await OpenHands.getModels(),
-  agents: await OpenHands.getAgents(),
-  securityAnalyzers: await OpenHands.getSecurityAnalyzers(),
+  models: await AgentMojo.getModels(),
+  agents: await AgentMojo.getAgents(),
+  securityAnalyzers: await AgentMojo.getSecurityAnalyzers(),
 });
 
 export const useAIConfigOptions = () =>

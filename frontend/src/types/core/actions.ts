@@ -1,7 +1,7 @@
-import { OpenHandsActionEvent } from "./base";
+import { AgentMojoActionEvent } from "./base";
 import { ActionSecurityRisk } from "#/state/security-analyzer-slice";
 
-export interface UserMessageAction extends OpenHandsActionEvent<"message"> {
+export interface UserMessageAction extends AgentMojoActionEvent<"message"> {
   source: "user";
   args: {
     content: string;
@@ -9,7 +9,7 @@ export interface UserMessageAction extends OpenHandsActionEvent<"message"> {
   };
 }
 
-export interface CommandAction extends OpenHandsActionEvent<"run"> {
+export interface CommandAction extends AgentMojoActionEvent<"run"> {
   source: "agent";
   args: {
     command: string;
@@ -21,7 +21,7 @@ export interface CommandAction extends OpenHandsActionEvent<"run"> {
 }
 
 export interface AssistantMessageAction
-  extends OpenHandsActionEvent<"message"> {
+  extends AgentMojoActionEvent<"message"> {
   source: "agent";
   args: {
     thought: string;
@@ -30,7 +30,7 @@ export interface AssistantMessageAction
   };
 }
 
-export interface IPythonAction extends OpenHandsActionEvent<"run_ipython"> {
+export interface IPythonAction extends AgentMojoActionEvent<"run_ipython"> {
   source: "agent";
   args: {
     code: string;
@@ -41,14 +41,14 @@ export interface IPythonAction extends OpenHandsActionEvent<"run_ipython"> {
   };
 }
 
-export interface ThinkAction extends OpenHandsActionEvent<"think"> {
+export interface ThinkAction extends AgentMojoActionEvent<"think"> {
   source: "agent";
   args: {
     thought: string;
   };
 }
 
-export interface FinishAction extends OpenHandsActionEvent<"finish"> {
+export interface FinishAction extends AgentMojoActionEvent<"finish"> {
   source: "agent";
   args: {
     final_thought: string;
@@ -58,7 +58,7 @@ export interface FinishAction extends OpenHandsActionEvent<"finish"> {
   };
 }
 
-export interface DelegateAction extends OpenHandsActionEvent<"delegate"> {
+export interface DelegateAction extends AgentMojoActionEvent<"delegate"> {
   source: "agent";
   timeout: number;
   args: {
@@ -68,7 +68,7 @@ export interface DelegateAction extends OpenHandsActionEvent<"delegate"> {
   };
 }
 
-export interface BrowseAction extends OpenHandsActionEvent<"browse"> {
+export interface BrowseAction extends AgentMojoActionEvent<"browse"> {
   source: "agent";
   args: {
     url: string;
@@ -77,7 +77,7 @@ export interface BrowseAction extends OpenHandsActionEvent<"browse"> {
 }
 
 export interface BrowseInteractiveAction
-  extends OpenHandsActionEvent<"browse_interactive"> {
+  extends AgentMojoActionEvent<"browse_interactive"> {
   source: "agent";
   timeout: number;
   args: {
@@ -87,7 +87,7 @@ export interface BrowseInteractiveAction
   };
 }
 
-export interface FileReadAction extends OpenHandsActionEvent<"read"> {
+export interface FileReadAction extends AgentMojoActionEvent<"read"> {
   source: "agent";
   args: {
     path: string;
@@ -98,7 +98,7 @@ export interface FileReadAction extends OpenHandsActionEvent<"read"> {
   };
 }
 
-export interface FileWriteAction extends OpenHandsActionEvent<"write"> {
+export interface FileWriteAction extends AgentMojoActionEvent<"write"> {
   source: "agent";
   args: {
     path: string;
@@ -107,7 +107,7 @@ export interface FileWriteAction extends OpenHandsActionEvent<"write"> {
   };
 }
 
-export interface FileEditAction extends OpenHandsActionEvent<"edit"> {
+export interface FileEditAction extends AgentMojoActionEvent<"edit"> {
   source: "agent";
   args: {
     path: string;
@@ -126,14 +126,14 @@ export interface FileEditAction extends OpenHandsActionEvent<"edit"> {
   };
 }
 
-export interface RejectAction extends OpenHandsActionEvent<"reject"> {
+export interface RejectAction extends AgentMojoActionEvent<"reject"> {
   source: "agent";
   args: {
     thought: string;
   };
 }
 
-export type OpenHandsAction =
+export type AgentMojoAction =
   | UserMessageAction
   | AssistantMessageAction
   | CommandAction

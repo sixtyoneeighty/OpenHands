@@ -1,0 +1,23 @@
+{
+    "name": "agentmojo-hello-world",
+    "displayName": "AgentMojo Hello World",
+    "description": "A simple hello world extension for AgentMojo",
+    "version": "0.0.1",
+    "publisher": "agentmojo",
+    "engines": {
+        "vscode": "^1.94.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onCommand:agentmojo-hello-world.helloWorld"
+    ],
+    "main": "./extension.js",
+    "contributes": {
+        "commands": [{
+            "command": "agentmojo-hello-world.helloWorld",
+            "title": "Hello World from AgentMojo"
+        }]
+    }
+}

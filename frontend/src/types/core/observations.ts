@@ -1,15 +1,15 @@
 import { AgentState } from "../agent-state";
-import { OpenHandsObservationEvent } from "./base";
+import { AgentMojoObservationEvent } from "./base";
 
 export interface AgentStateChangeObservation
-  extends OpenHandsObservationEvent<"agent_state_changed"> {
+  extends AgentMojoObservationEvent<"agent_state_changed"> {
   source: "agent";
   extras: {
     agent_state: AgentState;
   };
 }
 
-export interface CommandObservation extends OpenHandsObservationEvent<"run"> {
+export interface CommandObservation extends AgentMojoObservationEvent<"run"> {
   source: "agent";
   extras: {
     command: string;
@@ -19,7 +19,7 @@ export interface CommandObservation extends OpenHandsObservationEvent<"run"> {
 }
 
 export interface IPythonObservation
-  extends OpenHandsObservationEvent<"run_ipython"> {
+  extends AgentMojoObservationEvent<"run_ipython"> {
   source: "agent";
   extras: {
     code: string;
@@ -27,14 +27,14 @@ export interface IPythonObservation
 }
 
 export interface DelegateObservation
-  extends OpenHandsObservationEvent<"delegate"> {
+  extends AgentMojoObservationEvent<"delegate"> {
   source: "agent";
   extras: {
     outputs: Record<string, unknown>;
   };
 }
 
-export interface BrowseObservation extends OpenHandsObservationEvent<"browse"> {
+export interface BrowseObservation extends AgentMojoObservationEvent<"browse"> {
   source: "agent";
   extras: {
     url: string;
@@ -51,7 +51,7 @@ export interface BrowseObservation extends OpenHandsObservationEvent<"browse"> {
   };
 }
 
-export interface WriteObservation extends OpenHandsObservationEvent<"write"> {
+export interface WriteObservation extends AgentMojoObservationEvent<"write"> {
   source: "agent";
   extras: {
     path: string;
@@ -59,7 +59,7 @@ export interface WriteObservation extends OpenHandsObservationEvent<"write"> {
   };
 }
 
-export interface ReadObservation extends OpenHandsObservationEvent<"read"> {
+export interface ReadObservation extends AgentMojoObservationEvent<"read"> {
   source: "agent";
   extras: {
     path: string;
@@ -67,7 +67,7 @@ export interface ReadObservation extends OpenHandsObservationEvent<"read"> {
   };
 }
 
-export interface EditObservation extends OpenHandsObservationEvent<"edit"> {
+export interface EditObservation extends AgentMojoObservationEvent<"edit"> {
   source: "agent";
   extras: {
     path: string;
@@ -76,7 +76,7 @@ export interface EditObservation extends OpenHandsObservationEvent<"edit"> {
   };
 }
 
-export interface ErrorObservation extends OpenHandsObservationEvent<"error"> {
+export interface ErrorObservation extends AgentMojoObservationEvent<"error"> {
   source: "user";
   extras: {
     error_id?: string;
@@ -84,14 +84,14 @@ export interface ErrorObservation extends OpenHandsObservationEvent<"error"> {
 }
 
 export interface AgentThinkObservation
-  extends OpenHandsObservationEvent<"think"> {
+  extends AgentMojoObservationEvent<"think"> {
   source: "agent";
   extras: {
     thought: string;
   };
 }
 
-export type OpenHandsObservation =
+export type AgentMojoObservation =
   | AgentStateChangeObservation
   | AgentThinkObservation
   | CommandObservation
